@@ -11,9 +11,9 @@ npm install http-request-text
 var http_request_text= require("http-request-text");
 
 /*
-requestText = function (url, methodOrOptions, postData, headers, callback, lastKey)		//default
+requestText = function (url, methodOrOptions, postData, headers, callback, userData)		//default
 	methodOrOptions: string "POST"/"GET"/..., or user-defined options, ref. http.request().
-	callback: function( error:{ error, data.* }, data:{ responseText, statusCode, statusMessage, headers, lastKey } )
+	callback: function( error:{ error, data.* }, data:{ responseText, statusCode, statusMessage, headers, userData } )
 */
 http_request_text('http://url', 'GET', '', null,
     function (error, data) {
@@ -22,7 +22,7 @@ http_request_text('http://url', 'GET', '', null,
 );
 
 /*
-requestJson = function (url, methodOrOptions, postData, headers, callback, lastKey)
+requestJson = function (url, methodOrOptions, postData, headers, callback, userData)
 	callback: function( error:{ error, data.* }, data:{ responseJson, data.* from requestText() } )
 */
 http_request_text.requestJson('http://url/json', 'GET', '', null,

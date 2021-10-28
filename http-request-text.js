@@ -3,12 +3,10 @@
 // Simply enclose node.js http.request() for responseText/responseJson
 
 var http = require('http');
-const { clearTimeout } = require('timers');
-
 
 // methodOrOptions: string "POST"/"GET"/..., or user-defined options
-// callback: function( error:{ error, data.* }, data:{ responseText, statusCode, statusMessage, headers, lastKey } )
-var requestText = function (url, methodOrOptions, postData, headers, callback, lastKey) {
+// callback: function( error:{ error, data.* }, data:{ responseText, statusCode, statusMessage, headers, userData } )
+var requestText = function (url, methodOrOptions, postData, headers, callback, userData) {
 	//options
 	var options = (typeof methodOrOptions === "string") ? { method: methodOrOptions } : (methodOrOptions || {});
 
@@ -40,7 +38,7 @@ var requestText = function (url, methodOrOptions, postData, headers, callback, l
 					statusCode: res.statusCode,
 					statusMessage: res.statusMessage,
 					headers: res.headers,
-					lastKey: lastKey,
+					userData: userData,
 				};
 
 				if (res.statusCode === 200) {
@@ -56,7 +54,7 @@ var requestText = function (url, methodOrOptions, postData, headers, callback, l
 
 		if (options.timeout > 0) {		//use options.options.timeout ( before connected ) as waiting timeout also ( after connected )
 			tmid = res.setTimeout(options.timeout, () => {
-				if (callback) { callback({ error: "timeout, " + options.timeout, lastKey: lastKey }); }
+				if (callback) { callback({ error: "timeout, " + options.timeout, userData: userData }); }
 				tmid = null;
 				cleanup();
 				res.abort();
@@ -66,7 +64,7 @@ var requestText = function (url, methodOrOptions, postData, headers, callback, l
 
 	req.on('error', function (err) {
 		//console.log('request error: ' + err.message);
-		if (callback) { callback({ error: err, lastKey: lastKey }); }
+		if (callback) { callback({ error: err, userData: userData }); }
 		cleanup();
 	});
 
@@ -79,7 +77,7 @@ var requestText = function (url, methodOrOptions, postData, headers, callback, l
 }
 
 // callback: function( error:{ error, data.* }, data:{ responseJson, data.* from requestText() } )
-var requestJson = function (url, methodOrOptions, postData, headers, callback, lastKey) {
+var requestJson = function (url, methodOrOptions, postData, headers, callback, userData) {
 	requestText(url, methodOrOptions, postData, headers, function (error, data) {
 		if (error) { if (callback) callback(error, data); return; }
 
@@ -87,7 +85,7 @@ var requestJson = function (url, methodOrOptions, postData, headers, callback, l
 		catch (ex) { console.log(ex); data.responseJson = null; }
 
 		if (callback) callback(error, data);
-	}, lastKey);
+	}, userData);
 }
 
 //module
