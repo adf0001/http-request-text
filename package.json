@@ -1,0 +1,25 @@
+{
+  "name": "http-request-text",
+  "version": "1.0.1",
+  "description": "Simply enclose node.js http.request() for responseText/responseJson",
+  "main": "http-request-text.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "node",
+    "http",
+    "request",
+    "text"
+  ],
+  "author": "fwg",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adf0001/http-request-text.git"
+  },
+  "bugs": {
+    "url": "https://github.com/adf0001/http-request-text/issues"
+  },
+  "homepage": "https://github.com/adf0001/http-request-text#readme"
+}
