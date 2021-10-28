@@ -32,4 +32,3 @@ http_request_text.requestJson('http://url/json', 'GET', '', null,
 );
 
 ```
-

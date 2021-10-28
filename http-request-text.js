@@ -4,7 +4,7 @@
 
 var http = require('http');
 
-// methodOrOptions: string "POST"/"GET"/..., or user-defined options
+// methodOrOptions: string "POST"/"GET"/..., or user-defined options, ref. http.request().
 // callback: function( error:{ error, data.* }, data:{ responseText, statusCode, statusMessage, headers, userData } )
 var requestText = function (url, methodOrOptions, postData, headers, callback, userData) {
 	//options
@@ -16,13 +16,14 @@ var requestText = function (url, methodOrOptions, postData, headers, callback, u
 			{ 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' };
 	}
 
-	//request
+	//cleanup
 	var tmid;
 	var cleanup = () => {
 		if (tmid) { clearTimeout(tmid); tmid = null; };
 		callback = null; 	//call only once
 	}
 
+	//request
 	var req = http.request(url, options, function (res) {
 		var body = "";
 		res.setEncoding('utf8');
@@ -45,7 +46,7 @@ var requestText = function (url, methodOrOptions, postData, headers, callback, u
 					callback(null, resData)
 				}
 				else {
-					resData.error = res.statusCode + ":" + res.statusMessage;
+					resData.error = res.statusCode + " " + res.statusMessage;
 					callback(resData);
 				}
 				cleanup();
