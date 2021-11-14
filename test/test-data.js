@@ -10,7 +10,7 @@ module.exports = {
 		http_request_text('http://myip.ipip.net', 'GET', '', null,
 			function (error, data) {
 				console.log(error, data);
-				done(error && !error.error);
+				done(error && !error.responseText);
 			}
 		);
 	},
@@ -20,7 +20,7 @@ module.exports = {
 		http_request_text.requestJson('http://myip.ipip.net/json', 'GET', '', null,
 			function (error, data) {
 				console.log(error, data);
-				done(error && !error.error);
+				done(error && !error.responseText);
 			}
 		);
 	},

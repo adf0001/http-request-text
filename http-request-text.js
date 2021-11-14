@@ -5,7 +5,7 @@
 var http = require('http');
 
 // methodOrOptions: string "POST"/"GET"/..., or user-defined options, ref. http.request().
-// callback: function( error:{ error, data.* }, data:{ responseText, statusCode, statusMessage, headers, userData } )
+// callback: function( Error:{ data.* }, data:{ responseText, statusCode, statusMessage, headers, userData } )
 var requestText = function (url, methodOrOptions, postData, headers, callback, userData) {
 	//options
 	var options = (typeof methodOrOptions === "string") ? { method: methodOrOptions } : (methodOrOptions || {});
@@ -39,15 +39,14 @@ var requestText = function (url, methodOrOptions, postData, headers, callback, u
 					statusCode: res.statusCode,
 					statusMessage: res.statusMessage,
 					headers: res.headers,
-					userData: userData,
 				};
+				if (userData) resData.userData = userData;
 
 				if (res.statusCode === 200) {
 					callback(null, resData)
 				}
 				else {
-					resData.error = res.statusCode + " " + res.statusMessage;
-					callback(resData);
+					callback(Object.assign(Error(res.statusCode + " " + res.statusMessage), resData));
 				}
 				cleanup();
 			}
@@ -55,7 +54,11 @@ var requestText = function (url, methodOrOptions, postData, headers, callback, u
 
 		if (options.timeout > 0) {		//use options.options.timeout ( before connected ) as waiting timeout also ( after connected )
 			tmid = res.setTimeout(options.timeout, () => {
-				if (callback) { callback({ error: "timeout, " + options.timeout, userData: userData }); }
+				if (callback) {
+					var ret = Error("timeout, " + options.timeout);
+					if (userData) ret.userData = userData;
+					callback(ret);
+				}
 				tmid = null;
 				cleanup();
 				res.abort();
@@ -65,7 +68,10 @@ var requestText = function (url, methodOrOptions, postData, headers, callback, u
 
 	req.on('error', function (err) {
 		//console.log('request error: ' + err.message);
-		if (callback) { callback({ error: err, userData: userData }); }
+		if (callback) {
+			if (userData) err.userData = userData;
+			callback(err);
+		}
 		cleanup();
 	});
 
@@ -77,15 +83,38 @@ var requestText = function (url, methodOrOptions, postData, headers, callback, u
 	req.end();
 }
 
-// callback: function( error:{ error, data.* }, data:{ responseJson, data.* from requestText() } )
+// callback: function( Error:{ data.* }, data:{ responseJson, data.* from requestText() } )
 var requestJson = function (url, methodOrOptions, postData, headers, callback, userData) {
 	requestText(url, methodOrOptions, postData, headers, function (error, data) {
 		if (error) { if (callback) callback(error, data); return; }
 
-		try { data.responseJson = JSON.parse(data.responseText); }
-		catch (ex) { console.log(ex); data.responseJson = null; }
+		try {
+			data.responseJson = JSON.parse(data.responseText);
+		}
+		catch (ex) {
+			console.log(ex);
+			error = Object.assign(Error("JSON parse error, " + ex.message), data);
+		}
 
 		if (callback) callback(error, data);
+	}, userData);
+}
+
+// callback: function( error, data:responseText )
+var _text = function (url, methodOrOptions, postData, headers, callback, userData) {
+	requestText(url, methodOrOptions, postData, headers, function (error, data) {
+		if (error) { if (callback) callback(error, data); return; }
+
+		if (callback) callback(error, data.responseText);
+	}, userData);
+}
+
+// callback: function( error, data:responseJson )
+var _json = function (url, methodOrOptions, postData, headers, callback, userData) {
+	requestJson(url, methodOrOptions, postData, headers, function (error, data) {
+		if (error) { if (callback) callback(error, data); return; }
+
+		if (callback) callback(error, data.responseJson);
 	}, userData);
 }
 
@@ -95,3 +124,5 @@ module.exports = exports = requestText;
 
 exports.requestText = requestText;
 exports.requestJson = requestJson;
+exports.text = _text;
+exports.json = _json;
