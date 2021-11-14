@@ -1,6 +1,6 @@
 {
   "name": "http-request-text",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Simply enclose node.js http.request() for responseText/responseJson",
   "main": "http-request-text.js",
   "scripts": {

@@ -14,6 +14,7 @@ module.exports = {
 			}
 		);
 	},
+
 	".requestJson()": function (done) {
 		if (typeof window !== "undefined") throw "disable for browser";
 
@@ -24,6 +25,25 @@ module.exports = {
 			}
 		);
 	},
+
+	".text()": function (done) {
+		http_request_text.text('http://myip.ipip.net', 'GET', '', null,
+			function (error, data) {
+				console.log(error, data);
+				done(error && !error.responseText);
+			}
+		);
+	},
+
+	".json()": function (done) {
+		http_request_text.json('http://myip.ipip.net/json', 'GET', '', null,
+			function (error, data) {
+				console.log(error, data);
+				done(error && !error.responseText);
+			}
+		);
+	},
+
 };
 
 // for html page
