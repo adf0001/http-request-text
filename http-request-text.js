@@ -46,10 +46,11 @@ var requestText = function (url, methodOrOptions, postData, headers, callback, u
 					callback(null, resData)
 				}
 				else {
-					callback(Object.assign(Error(res.statusCode + " " + res.statusMessage), resData));
+					callback(Object.assign(Error(res.statusCode + " " + res.statusMessage +
+						(body ? (", " + body.slice(0, 255)) : "")), resData));
 				}
-				cleanup();
 			}
+			cleanup();
 		});
 
 		if (options.timeout > 0) {		//use options.options.timeout ( before connected ) as waiting timeout also ( after connected )
@@ -86,35 +87,30 @@ var requestText = function (url, methodOrOptions, postData, headers, callback, u
 // callback: function( Error:{ data.* }, data:{ responseJson, data.* from requestText() } )
 var requestJson = function (url, methodOrOptions, postData, headers, callback, userData) {
 	requestText(url, methodOrOptions, postData, headers, function (error, data) {
-		if (error) { if (callback) callback(error, data); return; }
-
-		try {
-			data.responseJson = JSON.parse(data.responseText);
+		if (!error) {
+			try {
+				data.responseJson = JSON.parse(data.responseText);
+			}
+			catch (ex) {
+				console.log(ex);
+				error = Object.assign(Error("JSON parse error, " + ex.message), data);
+			}
 		}
-		catch (ex) {
-			console.log(ex);
-			error = Object.assign(Error("JSON parse error, " + ex.message), data);
-		}
-
-		if (callback) callback(error, data);
+		callback && callback(error, data);
 	}, userData);
 }
 
 // callback: function( error, data:responseText )
 var _text = function (url, methodOrOptions, postData, headers, callback, userData) {
 	requestText(url, methodOrOptions, postData, headers, function (error, data) {
-		if (error) { if (callback) callback(error, data); return; }
-
-		if (callback) callback(error, data.responseText);
+		callback && callback(error, error ? data : data.responseText);
 	}, userData);
 }
 
 // callback: function( error, data:responseJson )
 var _json = function (url, methodOrOptions, postData, headers, callback, userData) {
 	requestJson(url, methodOrOptions, postData, headers, function (error, data) {
-		if (error) { if (callback) callback(error, data); return; }
-
-		if (callback) callback(error, data.responseJson);
+		callback && callback(error, error ? data : data.responseJson);
 	}, userData);
 }
 
